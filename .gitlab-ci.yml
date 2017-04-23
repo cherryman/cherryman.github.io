@@ -1,3 +1,5 @@
+image: publysher/hugo
+
 pages:
   script:
     - hugo
