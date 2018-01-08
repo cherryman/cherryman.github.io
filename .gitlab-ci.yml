@@ -6,8 +6,8 @@ pages:
     # Copy everything except baselevel hidden and
     # the public directory itself into public
     - mkdir public
-    - find ./* -path './public' -prune \
-        -o -exec cp '{}' 'public' \\;
+    - find ./* -path './public' -prune
+        -o -exec cp '{}' 'public' \;
   artifacts:
     paths:
       - public
