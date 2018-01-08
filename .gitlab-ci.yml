@@ -3,8 +3,11 @@ image: alpine:latest
 pages:
   stage: deploy
   script:
+    # Copy everything except baselevel hidden and
+    # the public directory itself into public
     - mkdir public
-    - cp -r * public
+    - find ./* -path './public' -prune \
+        -o -exec cp '{}' 'public' \\;
   artifacts:
     paths:
       - public
