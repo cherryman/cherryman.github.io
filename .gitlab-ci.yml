@@ -2,12 +2,14 @@ image: alpine:latest
 
 pages:
   stage: deploy
+  before_script:
+    - apk add git rsync
   script:
+    - git clone --depth 1 'https://github.com/CherryMan/tetris.git' tetris
     # Copy everything except baselevel hidden and
     # the public directory itself into public
     - mkdir public
-    - find ./* -path './public' -prune
-        -o -exec cp '{}' 'public' \;
+    - rsync -av --exclude '.*' --exclude '/public' . 'public'
   artifacts:
     paths:
       - public
