@@ -6,8 +6,6 @@ pages:
     - apk add git rsync
   script:
     - git clone --depth 1 'https://github.com/CherryMan/tetris.git' tetris
-    # Copy everything except baselevel hidden and
-    # the public directory itself into public
     - mkdir public
     - rsync -av --exclude '.*' --exclude '/public' . 'public'
   artifacts:
