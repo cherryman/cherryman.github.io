@@ -3,11 +3,11 @@ image: alpine:latest
 pages:
   stage: deploy
   before_script:
-    - apk add git rsync
+    - apk add git hugo
   script:
-    - git clone --depth 1 'https://github.com/CherryMan/tetris.git' tetris
-    - mkdir public
-    - rsync -av --exclude '.*' --exclude '/public' . 'public'
+    - mkdir -p extra
+    - git clone --depth 1 'https://github.com/CherryMan/tetris.git' extra/tetris
+    - hugo
   artifacts:
     paths:
       - public

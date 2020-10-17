@@ -1,0 +1,19 @@
+html {
+  margin: 0;
+  left: 0;
+  right: 0;
+  font-family: 'Source Sans Pro', Helvetica, sans-serif;
+  font-size: 1em;
+}
+body {
+  margin: 0;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 60vh;
+}
+h1, p {
+  margin: 0;
+}

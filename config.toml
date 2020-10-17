@@ -1,0 +1,4 @@
+baseURL = "https://cherryman.org"
+languageCode = "en-us"
+title = "CherryMan"
+staticDir = ["static", "extra"]
