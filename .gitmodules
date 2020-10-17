@@ -1,0 +1,3 @@
+[submodule "extra/tetris"]
+	path = static/tetris
+	url = https://github.com/CherryMan/tetris.git

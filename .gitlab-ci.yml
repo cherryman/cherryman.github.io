@@ -1,12 +1,13 @@
 image: alpine:latest
 
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
 pages:
   stage: deploy
   before_script:
-    - apk add git hugo
+    - apk add hugo
   script:
-    - mkdir -p extra
-    - git clone --depth 1 'https://github.com/CherryMan/tetris.git' extra/tetris
     - hugo
   artifacts:
     paths:
