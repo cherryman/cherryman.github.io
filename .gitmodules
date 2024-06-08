@@ -1,3 +1,6 @@
 [submodule "extra/tetris"]
 	path = static/tetris
 	url = https://github.com/CherryMan/tetris.git
+[submodule "themes/papermod"]
+	path = themes/papermod
+	url = https://github.com/adityatelange/hugo-PaperMod.git
