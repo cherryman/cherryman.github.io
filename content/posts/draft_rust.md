@@ -1,5 +1,5 @@
 ---
-title: "Rust error handling in production"
+title: "The different modes of Rust error handling"
 date: "2024-06-08"
 math: true
 description: "desc"
@@ -34,4 +34,26 @@ maybe talk about the "modes" of error handling, namely:
 - logging for debugging
 - crashing the application?
 - retry loops?
+
+how the fuck do i start this post.
+
+who is the audience? i'm guessing folk who have
+at least some experience writing rust, and have experienced
+this pain point in the past.
 -->
+
+<!--
+# References
+
+[^1]: https://sabrinajewson.org/blog/errors
+[^2]: https://www.lpalmieri.com/posts/error-handling-rust/
+[^3]: https://www.sheshbabu.com/posts/rust-error-handling/
+-->
+
+
+
+```rust
+pub fn main() -> Result<(), Error> {
+    Ok(())
+}
+```
