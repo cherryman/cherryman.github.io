@@ -4,6 +4,13 @@ title = "CherryMan"
 theme = "papermod"
 mainsections = ["posts"]
 
+[markup.goldmark.extensions.passthrough]
+enable = true
+
+[markup.goldmark.extensions.passthrough.delimiters]
+block = [['$$', '$$']]
+inline = [['$', '$']]
+
 [params]
 env = "production"
 defaultTheme = "auto"
