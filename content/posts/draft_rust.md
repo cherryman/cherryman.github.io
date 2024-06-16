@@ -27,6 +27,7 @@ might want to discuss how to get line numbers this way though
 https://sabrinajewson.org/blog/errors
 https://www.lpalmieri.com/posts/error-handling-rust/#summary
 https://www.sheshbabu.com/posts/rust-error-handling/
+https://mmapped.blog/posts/12-rust-error-handling
 
 maybe talk about the "modes" of error handling, namely:
 - user facing
