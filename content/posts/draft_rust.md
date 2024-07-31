@@ -28,6 +28,7 @@ https://sabrinajewson.org/blog/errors
 https://www.lpalmieri.com/posts/error-handling-rust/#summary
 https://www.sheshbabu.com/posts/rust-error-handling/
 https://mmapped.blog/posts/12-rust-error-handling
+https://blog.burntsushi.net/rust-error-handling/
 
 maybe talk about the "modes" of error handling, namely:
 - user facing
@@ -51,10 +52,83 @@ this pain point in the past.
 [^3]: https://www.sheshbabu.com/posts/rust-error-handling/
 -->
 
-
+rust error handling has several different modes. for example,
+for cli applications, the examples given by `anyhow` or `eyre`
+work great
 
 ```rust
-pub fn main() -> Result<(), Error> {
-    Ok(())
+use eyre::{WrapErr, Result};
+
+fn main() -> Result<()> {
+    ...
+    it.detach().wrap_err("Failed to detach the important thing")?;
+
+    let content = std::fs::read(path)
+        .wrap_err_with(|| format!("Failed to read instrs from {}", path))?;
+    ...
 }
 ```
+
+```
+Error: Failed to read instrs from ./path/to/instrs.json
+
+Caused by:
+    No such file or directory (os error 2)
+```
+
+ultimately, the purpose of the error is to bubble up while building the
+error that is ultimately returned to the user. similarly, errors are
+great for libraries that are ultimately used by the end consumer.
+
+a great example is `std::error::ErrorKind`
+
+```rust
+pub enum ErrorKind {
+    NotFound,
+    PermissionDenied,
+    ConnectionRefused,
+    ConnectionReset,
+    /* a fuckton more errors */
+}
+```
+
+this is great as it allows the library author to granularly handle
+specific cases, such as retrying on transient errors while reporting
+failing instances.
+
+however, there's one specific case that i can't seem to find anything
+reasonable on, which surprisingly gets little attention, and that is
+that of _rust error handling for production infrastructure_.
+
+an example flow is as follows:
+
+0. you want to do an api call to foo api
+0. this api request fails in some critical component
+
+now, to handle this cleanly, you'll want to
+
+- print a log so that you can catch it in your alerting
+- have a backtrace of this so that you can figure out where
+  it was triggered
+- in other cases allow the caller to handle the error
+- in some conditional case do the alerting and printing the
+  backtrace
+
+this "backtrace" use case is currently super awkward in rust.
+in fact, without `RUST_LIB_BACKTRACE=1` or `RUST_BACKTRACE=1`,
+rust doesn't even record backtraces, despite there being no
+documented on what the actual performance impact of always
+enabling backtraces even is!
+
+the appriach i've found that seems to work best is a combination
+of the `tracing` crate with the `instrument` macro, combined with
+the `err` keyword, which will log if a given function returns
+an error. combined with rust's `backtrace` feature, this allows
+creating this experience smoothly. the level can be overwritten
+as well, so if you want a warning instead, `#[tracing::instrument(level
+= Level::WARN)]` works perfectly.
+
+(TODO look at other `tracing::instrument` shit)
+
+this covers all our use cases above, though is somewhat clunky.
+perhaps backtraces should be the default.
