@@ -128,7 +128,57 @@ creating this experience smoothly. the level can be overwritten
 as well, so if you want a warning instead, `#[tracing::instrument(level
 = Level::WARN)]` works perfectly.
 
-(TODO look at other `tracing::instrument` shit)
-
 this covers all our use cases above, though is somewhat clunky.
 perhaps backtraces should be the default.
+
+```rust
+#[tracing::instrument(ret, err)]
+fn faillible_function(x: &[u8]) -> eyre::Result<()> {
+    Ok(())
+}
+```
+
+(TODO: look at other `tracing::instrument` shit)
+(TODO: test if what i'm saying is true)
+
+this provides an interesting dynamic:
+
+- `tracing` builds the stack _downwards_
+- `eyre` with backtrace builds it upwards
+
+thus, at any point when the log is printed, the error will provide
+all information that is necessary. there is an annoyance however:
+what happens if you nest functions that print the error as above?
+
+```rust
+#[tracing::instrument(ret, err)]
+fn foo(x: &[u8]) -> eyre::Result<()> {
+    todo!()
+}
+
+#[tracing::instrument(ret, err)]
+fn bar(_: &[u8]) -> eyre::Result<()> {
+    foo()
+}
+```
+
+then we get two logs for no reason. this is stupid. to deal with this,
+we can rely on a little bit of self-discipline. namely, only printing
+errors at a given layer. i'm not sure what the appropriate rule is,
+and of course it depends on how your program is leveraging tracing
+as well. personally, a nice rule of thumb may be:
+
+- "pure" functions need only return their error; no logging or trace needed
+- callers of faillible functions should log and propagate the error
+- any function above in the stack shouldn't print an error, instead
+  just forwarding it.
+
+i suppose we can also use that there are sort of only two errors:
+
+- recoverable
+- fatal
+
+for the former, we log and continue running; in that case, best to log
+at the tail. for fatal errors, we know we will propagate all the way up.
+in that case, it makes more sense to let the error bubble up, and then
+do the logging at the shallowest part of the stack.
