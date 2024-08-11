@@ -42,6 +42,14 @@ how the fuck do i start this post.
 who is the audience? i'm guessing folk who have
 at least some experience writing rust, and have experienced
 this pain point in the past.
+
+https://docs.rs/tracing-subscriber/latest/tracing_subscriber/fmt/struct.TestWriter.html
+
+TODO:
+https://docs.rs/tracing-error/latest/tracing_error/
+https://docs.rs/displaydoc/latest/displaydoc/
+https://docs.rs/backtrace/latest/backtrace/
+https://docs.rs/educe/latest/educe/
 -->
 
 <!--
@@ -80,7 +88,7 @@ ultimately, the purpose of the error is to bubble up while building the
 error that is ultimately returned to the user. similarly, errors are
 great for libraries that are ultimately used by the end consumer.
 
-a great example is `std::error::ErrorKind`
+a great example is `std::io::ErrorKind`
 
 ```rust
 pub enum ErrorKind {
@@ -120,7 +128,7 @@ rust doesn't even record backtraces, despite there being no
 documented on what the actual performance impact of always
 enabling backtraces even is!
 
-the appriach i've found that seems to work best is a combination
+the approach i've found that seems to work best is a combination
 of the `tracing` crate with the `instrument` macro, combined with
 the `err` keyword, which will log if a given function returns
 an error. combined with rust's `backtrace` feature, this allows
@@ -182,3 +190,119 @@ for the former, we log and continue running; in that case, best to log
 at the tail. for fatal errors, we know we will propagate all the way up.
 in that case, it makes more sense to let the error bubble up, and then
 do the logging at the shallowest part of the stack.
+
+a full example below:
+
+```rust
+fn main() -> anyhow::Result<()> {
+    std::env::set_var("RUST_LIB_BACKTRACE", "1");
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
+
+    foo()
+        .inspect_err(|e| {
+            tracing::error!(error = %e, backtrace = %e.backtrace(), "error");
+        })
+        .ok();
+
+    Ok(())
+}
+
+#[tracing::instrument()]
+fn foo() -> anyhow::Result<()> {
+    bar()?;
+    Ok(())
+}
+
+#[tracing::instrument(ret, err)]
+fn bar() -> anyhow::Result<()> {
+    anyhow::bail!("something really bad happened");
+}
+```
+
+the output looks like:
+
+(TODO: enable line numbers)
+
+```
+2024-08-09T04:30:17.232035Z ERROR foo:bar: errtest: error=something really bad happened
+2024-08-09T04:30:17.232073Z ERROR errtest: error error=something really bad happened backtrace=   0: std::backtrace_rs::backtrace::libunwind::trace
+             at /rustc/b1ec1bd65f89c1375d2cf2fb733a87ef390276d3/library/std/src/../../backtrace/src/backtrace/libunwind.rs:105:5
+   1: std::backtrace_rs::backtrace::trace_unsynchronized
+             at /rustc/b1ec1bd65f89c1375d2cf2fb733a87ef390276d3/library/std/src/../../backtrace/src/backtrace/mod.rs:66:5
+
+# omitted ...
+```
+
+admittedly, the backtrace is quite ugly when printed to the command
+line. however, i think this is fine since in practice, for the purposes
+of what we're doing here, you'll be using some other tool to view the
+logs. of course, if this really bothers you, then modifying the
+`on_error` recorder is a totally valid option:
+
+(TODO: EXAMPLE HERE)
+
+## What about `tracing-error`
+
+An alternative is using this crate to also capture
+the span, as the span has crucial information. you can
+consider making a fancy error type that encompasses everything,
+though it may be better to instead use `color-eyre` for this.
+
+also, the unfortunate tradeoff is that this ends up losing
+a lot of the benefits of tracing, namely, using it with
+tooling for tracing the actual error! with the trick above,
+we can log the error and include it in our traces, while also
+ensuring that it can be debugged through the logs.
+
+<!-- ARTICLE BEGINS BELOW -->
+
+"Rust errors for reporting"
+
+Rust error handling has several "modes" to it. We always start from
+the basic approach that everyone learns when they first learn Rust,
+where the caller can deal with the error with pattern matching. For
+example, `std::env::VarError`:
+
+```rust
+pub enum VarError {
+    NotPresent,
+    NotUnicode(OsString),
+}
+```
+
+This approach is nicely covered in [this great article by Sabrina
+Jewson](https://sabrinajewson.org/blog/errors). Of course, for
+applications such as command-line, we do want to turn this into
+a nice error message for the user. This is where crates like `anyhow`
+come in. They have a great example to demonstrate:
+
+<!-- TODO: link -->
+
+```rust
+use anyhow::{Context, Result};
+
+fn main() -> Result<()> {
+    ...
+    it.detach().context("Failed to detach the important thing")?;
+
+    let content = std::fs::read(path)
+        .with_context(|| format!("Failed to read instrs from {}", path))?;
+    ...
+}
+```
+
+Which produces:
+
+```
+Error: Failed to read instrs from ./path/to/instrs.json
+
+Caused by:
+    No such file or directory (os error 2)
+```
+
+<!-- TODO: possibly mention eyre -->
+
+However, there's one that I think is critically not covered enough, and
+that's how to deal with errors _in production_.
