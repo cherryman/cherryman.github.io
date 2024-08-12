@@ -305,4 +305,17 @@ Caused by:
 <!-- TODO: possibly mention eyre -->
 
 However, there's one that I think is critically not covered enough, and
-that's how to deal with errors _in production_.
+that's how to deal with errors _in production_. Specifically, for long
+running services that don't necessarily terminate when a given call
+fails, but do want to _report_ it so it can be investigated. Not only
+that, but we want to be able to pin down exactly what triggered the
+error. This is probably still unclear, so as an example:
+
+0. You want to do an HTTP request to an external API.
+0. Certain errors that the API returns are completely fatal.
+
+If this happens, we're doomed! The service dies, and we need to deal
+with the source of the error ASAP. How do we design our system to be
+as easy to debug as possible?
+
+## Enter `tracing`
