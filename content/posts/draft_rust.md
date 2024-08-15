@@ -319,3 +319,24 @@ with the source of the error ASAP. How do we design our system to be
 as easy to debug as possible?
 
 ## Enter `tracing`
+
+When debugging a runtime error, we need to not only what the path that
+led to the error was, but ideally also the arguments! A great approach
+for this is using `tracing`.
+
+```rust
+fn main() -> anyhow::Result<()> {
+    foo()?;
+    Ok(())
+}
+
+#[tracing::instrument()]
+fn foo(x: usize) -> anyhow::Result<()> {
+    bar(x)
+}
+
+#[tracing::instrument(err)]
+fn bar(x: usize) -> anyhow::Result<()> {
+    anyhow::bail!("oh no");
+}
+```
