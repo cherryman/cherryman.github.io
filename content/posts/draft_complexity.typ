@@ -77,6 +77,7 @@
 //   (perhaps quicksort, hash tables, vec pus)
 // - is that useful
 //
+// - sublinear algorithms
 // - possibly abuse the lebesgue integral
 // - algebra over complexities
 // - somehow mention tropical semirings ("plz" - tommy)
