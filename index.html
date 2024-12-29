@@ -6,14 +6,13 @@
     <title>cherryman</title>
     <style>
       html {
-        margin: 0;
         left: 0;
         right: 0;
         font-family: monospace;
         font-size: 1em;
       }
       body {
-        margin: 0;
+        margin: 1em;
         display: flex;
         flex-flow: column;
         justify-content: center;
@@ -27,22 +26,61 @@
       a {
         color: black;
       }
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      ul li {
+        position: relative;
+        padding-left: 1em;
+      }
+      ul li::before {
+        content: ">";
+        position: absolute;
+        left: 0;
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h2>cherryman</h2>
+      <h2>sheheryar</h2>
 
-      <p><a href="mailto:me@cherryman.org">me@cherryman.org</a></p>
-      <p><a href="https://x.com/sheryparv">x.com/sheryparv</a></p>
-      <p><a href="https://github.com/cherryman">github.com/cherryman</a></p>
-      <br>
       <p>
-      systems and math guy. cto at <a href="https://www.layern.com">layer n</a>.
+      systems and math guy.
+      <br>
+      cto at <a href="https://www.n1.xyz">n1.xyz</a> (<a href="https://docsend.com/view/bvu594ex3di55gsh">litepaper</a>).
       </p>
+
+      <br>
+
+      <p><a href="https://x.com/_snaerr">twitter.com/_snaerr</a></p>
+      <p><a href="https://github.com/cherryman">github.com/cherryman</a></p>
 
       <h3>posts</h3>
       <p>coming soon.</p>
+
+      <h3>previously</h3>
+      <ul>
+        <li>
+          a <a href="https://www.n1.xyz/blog/we-built-the-fastest-rollup-on-ethereum-then-left"> wildly fast exchange</a>  settling to ethereum
+        </li>
+        <li>
+          an <a href="https://x.com/01_exchange">exchange on solana</a> with >$10M cumulative volume (blown up by ftx)
+        </li>
+        <li>
+          organizer and mentor for a <a href="https://www.marihacks.com/">pre-university hackathon</a>
+        </li>
+      </ul>
+
+      <h3>misc projects</h3>
+      <ul>
+        <ul>
+          <li><a href="https://github.com/n1xyz/eigenda-kzg">kzg commitment calculation</a> for the sp1 zero-knowledge vm</li>
+          <li><a href="https://devpost.com/software/vizart-ai">air drawing</a> at mchacks '24, 1st place</li>
+          <li><a href="https://github.com/cherryman/riscv">risc-v in verilog</a> (kinda mid)</li>
+        </ul>
+      </ul>
     </div>
   </body>
 </html>
